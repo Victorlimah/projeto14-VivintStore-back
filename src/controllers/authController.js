@@ -65,11 +65,13 @@ export async function signIn(req, res) {
       const token = jwt.sign(dados, chaveSecreta, { expiresIn: "1h" });
 
       await db.collection("sections").insertOne({ token, user: user.email });
-      res.status(200).json({ token, user: user.name });
+      res.status(200).json({ token, name: user.name });
     } else {
-      res.status(401).send({ message: "Usuario ou senha incorretos" });
+      res.status(401).send({ message: "Usuário ou senha incorretos" });
     }
   } catch {
-    res.status(500).send({ message: "Erro ao logar" });
+    res
+      .status(500)
+      .send({ message: "Erro ao realizar login. Tente novamente." });
   }
 }
