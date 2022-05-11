@@ -17,9 +17,6 @@ export async function signUp(req, res) {
     if (emailVerification) {
         return res.status(400).send("O email já está cadastrado");
     }
-    if (password !== confirmationPassword) {
-        return res.status(400).send({ message: "As senhas não conferem" });
-    }
 
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
@@ -27,6 +24,9 @@ export async function signUp(req, res) {
         return;
     }
 
+    if (password !== confirmationPassword) {
+        return res.status(400).send({ message: "As senhas não conferem" });
+    }
     try {
         await db.collection('users').insertOne({ name, email, password: await bcrypt.hash(password, 10) });
         res.status(201).json({ message: 'Usuario cadastrado' });
@@ -51,6 +51,7 @@ export async function signIn(req, res) {
     try {
         const user = await db.collection("users").findOne({ email });
         const isValid = await bcrypt.compare(password, user.password);
+
         if (user && isValid) {
             const token = uuid();
             await db.collection("sections").insertOne({ token, user: user.email });
