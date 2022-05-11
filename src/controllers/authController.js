@@ -15,7 +15,7 @@ export async function signUp(req, res) {
     });
 
     if (emailVerification) {
-        return res.status(400).send("O email já está cadastrado");
+        return res.status(409).send("O email já está cadastrado");
     }
 
     const { error } = schema.validate(req.body, { abortEarly: false });
@@ -25,7 +25,7 @@ export async function signUp(req, res) {
     }
 
     if (password !== confirmationPassword) {
-        return res.status(400).send({ message: "As senhas não conferem" });
+        return res.status(401).send({ message: "As senhas não conferem" });
     }
     try {
         await db.collection('users').insertOne({ name, email, password: await bcrypt.hash(password, 10) });
