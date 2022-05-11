@@ -1,14 +1,14 @@
 import db from '../db.js';
 import bcrypt from 'bcrypt';
-import { v4 as uuid } from 'uuid';
 import joi from 'joi';
 import jwt from 'jsonwebtoken';
+import { stripHtml } from 'string-strip-html';
 
 export async function signUp(req, res) {
     const { name, email, password, confirmationPassword } = req.body;
     const emailVerification = await db.collection('users').findOne({ email });
     const userId = Date.now();
-
+    const sazitizedName = stripHtml(name).result.trim();
     const schema = joi.object({
         name: joi.string().required(),
         email: joi.string().email().required(),
@@ -16,21 +16,20 @@ export async function signUp(req, res) {
         confirmationPassword: joi.string().required()
     });
 
-    if (emailVerification) {
-        return res.status(409).send("O email já está cadastrado");
-    }
 
     const { error } = schema.validate(req.body, { abortEarly: false });
     if (error) {
         res.status(422).send(error.details.map(d => d.message));
         return;
     }
-
+    if (emailVerification) {
+        return res.status(409).send("O email já está cadastrado");
+    }
     if (password !== confirmationPassword) {
         return res.status(401).send({ message: "As senhas não conferem" });
     }
     try {
-        await db.collection('users').insertOne({ name, email, password: await bcrypt.hash(password, 10), userId });
+        await db.collection('users').insertOne({ sazitizedName, email, password: await bcrypt.hash(password, 10), userId });
         res.status(201).json({ message: 'Usuario cadastrado' });
     } catch {
         res.status(500).send({ message: 'Erro ao cadastrar usuario' });

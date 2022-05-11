@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "assert": "^2.0.0",
+    "string-strip-html": "^9.1.12"
+  }
+}
