@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { verifyJWT } from "../middlewares/verifyJWT.js";
+
 import {
   getCategory,
   getProduct,
@@ -7,8 +9,8 @@ import {
 
 const productsRouter = Router();
 
-productsRouter.get("/products", getProducts);
-productsRouter.get("/products/:id", getProduct);
-productsRouter.get("/products/:type", getCategory);
+productsRouter.get("/products", verifyJWT, getProducts);
+productsRouter.get("/products/:id", verifyJWT, getProduct);
+productsRouter.get("/category/:type", verifyJWT, getCategory);
 
 export default productsRouter;

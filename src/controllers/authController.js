@@ -27,7 +27,7 @@ export async function signUp(req, res) {
 
   try {
     await db.collection("users").insertOne({
-      sazitizedName,
+      name: sazitizedName,
       email,
       password: await bcrypt.hash(password, 10),
       userId,
@@ -40,8 +40,6 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
   const { email, password } = req.body;
-  console.log(email, password);
-  const sectionId = Date.now();
   const secretKey = process.env.JWT_SECRET;
 
   const schema = joi.object({
@@ -57,13 +55,13 @@ export async function signIn(req, res) {
     if (!user) return res.status(401).send({ message: "Email não cadastrado" });
 
     const isValid = await bcrypt.compare(password, user.password);
-
+    console.log(user._id);
     if (user && isValid) {
-      const data = { userId: user.userId, sectionId };
-      const token = jwt.sign(data, secretKey, { expiresIn: 60 * 60 * 2 });
+      const data = { userId: user._id, name: user.name };
+      const token = jwt.sign(data, secretKey, { expiresIn: "1h" });
 
       await db.collection("sections").insertOne({ token, user: user.email });
-      res.status(200).send({ token, name: user.sazitizedName });
+      res.status(200).send({ token });
     } else res.status(401).send({ message: "Usuário ou senha incorretos" });
   } catch (e) {
     res
