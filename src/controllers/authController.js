@@ -17,16 +17,14 @@ export async function signUp(req, res) {
   });
 
   const { error } = schema.validate(req.body, { abortEarly: false });
-  if (error) {
-    res.status(422).send(error.details.map((d) => d.message));
-    return;
-  }
-  if (emailVerification) {
+  if (error) return res.status(422).send(error.details.map((d) => d.message));
+
+  if (emailVerification)
     return res.status(409).send({ message: "O email já está cadastrado" });
-  }
-  if (password !== confirmationPassword) {
+
+  if (password !== confirmationPassword)
     return res.status(401).send({ message: "As senhas não conferem" });
-  }
+
   try {
     await db.collection("users").insertOne({
       sazitizedName,
@@ -42,8 +40,9 @@ export async function signUp(req, res) {
 
 export async function signIn(req, res) {
   const { email, password } = req.body;
+  console.log(email, password);
   const sectionId = Date.now();
-  const chaveSecreta = process.env.JWT_SECRET;
+  const secretKey = process.env.JWT_SECRET;
 
   const schema = joi.object({
     email: joi.string().email().required(),
@@ -51,25 +50,22 @@ export async function signIn(req, res) {
   });
 
   const { error } = schema.validate(req.body, { abortEarly: false });
-  if (error) {
-    res.status(422).send(error.details.map((d) => d.message));
-    return;
-  }
+  if (error) return res.status(422).send(error.details.map((d) => d.message));
 
   try {
     const user = await db.collection("users").findOne({ email });
+    if (!user) return res.status(401).send({ message: "Email não cadastrado" });
+
     const isValid = await bcrypt.compare(password, user.password);
 
     if (user && isValid) {
-      const dados = { userId: user.userId, sectionId };
-      const token = jwt.sign(dados, chaveSecreta, { expiresIn: "1h" });
+      const data = { userId: user.userId, sectionId };
+      const token = jwt.sign(data, secretKey, { expiresIn: 60 * 60 * 2 });
 
       await db.collection("sections").insertOne({ token, user: user.email });
-      res.status(200).json({ token, name: user.name });
-    } else {
-      res.status(401).send({ message: "Usuário ou senha incorretos" });
-    }
-  } catch {
+      res.status(200).send({ token, name: user.sazitizedName });
+    } else res.status(401).send({ message: "Usuário ou senha incorretos" });
+  } catch (e) {
     res
       .status(500)
       .send({ message: "Erro ao realizar login. Tente novamente." });
