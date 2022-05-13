@@ -55,7 +55,7 @@ export async function signIn(req, res) {
     if (!user) return res.status(401).send({ message: "Email não cadastrado" });
 
     const isValid = await bcrypt.compare(password, user.password);
-    console.log(user._id);
+
     if (user && isValid) {
       const data = { userId: user._id, name: user.name };
       const token = jwt.sign(data, secretKey, { expiresIn: "1h" });
