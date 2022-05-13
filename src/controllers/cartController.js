@@ -125,3 +125,4 @@ export async function getCity(req, res) {
     res.status(401).send({ message: "Erro ao buscar cep" });
   }
 }
+
