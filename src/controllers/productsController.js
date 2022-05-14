@@ -10,6 +10,7 @@ export async function getProducts(req, res) {
 }
 
 export async function getProduct(req, res) {
+  const { id } = req.params;
   try {
     const product = await db.collection("products").findOne({ id });
     res.status(200).send(product);
