@@ -4,7 +4,7 @@ import axios from "axios";
 export async function getCart(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req.params;
+    const { userId } = req;
     let total = 0;
     let lengthCart = 0;
 
@@ -38,7 +38,7 @@ export async function getCart(req, res) {
 export async function addProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req.params;
+    const { userId } = req;
     const { productId, price, quantity } = req.body;
 
     const cart = await collection.findOne({ userId });
@@ -66,7 +66,7 @@ export async function addProduct(req, res) {
 export async function removeOneProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req.params;
+    const { userId } = req;
     const { productId } = req.body;
 
     const cart = await collection.findOne({ userId });
@@ -92,7 +92,7 @@ export async function removeOneProduct(req, res) {
 export async function removeProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req.params;
+    const { userId } = req;
     const { productId } = req.body;
 
     const cart = await collection.findOne({ userId });
@@ -107,6 +107,35 @@ export async function removeProduct(req, res) {
     res.status(200).send({ message: "Produto removido do carrinho" });
   } catch (err) {
     res.status(401).send({ message: "Erro ao remover produto" });
+  }
+}
+
+export async function buyOrder(req, res) {
+  try {
+    const collection = db.collection("cart");
+    const orders = db.collection("orders");
+    const { userId } = req;
+    const { adress, zipCode, localidade, uf } = req.body;
+
+    const cart = await collection.findOne({ userId });
+    const products = cart.products;
+
+    const order = {
+      id: Date.now(),
+      userId,
+      adress,
+      zipCode,
+      localidade,
+      uf,
+      products,
+    };
+
+    await collection.updateOne({ userId }, { $set: { products: [] } });
+    await orders.insertOne(order);
+
+    res.status(200).send({ orderID: order.id });
+  } catch (err) {
+    res.status(401).send({ message: "Erro ao realizar compra" });
   }
 }
 
