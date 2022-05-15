@@ -42,8 +42,6 @@ export async function addProduct(req, res) {
     const collection = db.collection("cart");
     const productsDB = db.collection("products");
 
-    console.log(await collection.find({}).toArray());
-
     const { userId } = req.userId;
     const { name } = req.body;
 
@@ -154,6 +152,12 @@ export async function buyOrder(req, res) {
     const cart = await collection.findOne({ userId });
     const products = cart.products;
 
+    //calcular valor total multiplicando o price por quantity
+    let total = 0;
+    products.forEach((product) => {
+      total += product.price * product.quantity;
+    });
+
     const order = {
       id: Date.now().toString().slice(-6),
       userId,
@@ -162,6 +166,7 @@ export async function buyOrder(req, res) {
       localidade,
       uf,
       products,
+      total,
     };
 
     await collection.updateOne({ userId }, { $set: { products: [] } });
@@ -170,6 +175,20 @@ export async function buyOrder(req, res) {
     res.status(200).send({ orderID: order.id });
   } catch (err) {
     res.status(401).send({ message: "Erro ao realizar compra" });
+  }
+}
+
+export async function getOrders(req, res) {
+  try {
+    const orders = db.collection("orders");
+    const { userId } = req.userId;
+
+    const ordersUser = await orders.find({ userId }).toArray();
+
+    res.status(200).send({ ordersUser });
+  } catch (err) {
+    console.log(err);
+    res.status(401).send({ message: "Erro ao pegar pedidos" });
   }
 }
 
