@@ -63,29 +63,24 @@ export async function addProduct(req, res) {
   }
 }
 
-export async function removeOneProduct(req, res) {
+export async function putProduct(req, res) {
   try {
     const collection = db.collection("cart");
     const { userId } = req;
-    const { productId } = req.body;
+    const { productId, quantity } = req.body;
 
     const cart = await collection.findOne({ userId });
-
     const products = cart.products;
 
     const product = products.find((product) => product.id === productId);
 
-    if (!product)
-      return res.status(401).send({ message: "Produto não existe" });
-
-    if (product.quantity === 1) products.splice(products.indexOf(product), 1);
-    else product.quantity -= 1;
+    if (product) product.quantity = quantity;
 
     await collection.updateOne({ userId }, { $set: { products } });
 
-    res.status(200).send({ message: "Produto removido do carrinho" });
+    res.status(200).send({ message: "Produto atualizado" });
   } catch (err) {
-    res.status(401).send({ message: "Erro ao remover produto" });
+    res.status(401).send({ message: "Erro ao atualizar produto" });
   }
 }
 
@@ -93,12 +88,12 @@ export async function removeProduct(req, res) {
   try {
     const collection = db.collection("cart");
     const { userId } = req;
-    const { productId } = req.body;
+    const { id } = req.params;
 
     const cart = await collection.findOne({ userId });
     const products = cart.products;
 
-    const product = products.find((product) => product.id === productId);
+    const product = products.find((product) => product.id === id);
 
     if (product) products.splice(products.indexOf(product), 1);
 

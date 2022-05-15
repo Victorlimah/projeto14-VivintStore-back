@@ -5,7 +5,7 @@ import {
   getCity,
   addProduct,
   removeProduct,
-  removeOneProduct,
+  putProduct,
 } from "../controllers/cartController.js";
 
 const cartRouter = Router();
@@ -13,8 +13,8 @@ const cartRouter = Router();
 cartRouter.get("/city/:zipCode", getCity);
 cartRouter.get("/cart", verifyJWT, getCart);
 cartRouter.post("/cart-add", verifyJWT, addProduct);
-cartRouter.delete("/cart-remove/:id", verifyJWT, removeProduct);
-cartRouter.post("/cart-remove-one", verifyJWT, removeOneProduct);
+cartRouter.delete("/cart/:id", verifyJWT, removeProduct);
+cartRouter.put("/cart/:id/put", verifyJWT, putProduct);
 //cartRouter.post("/order", verifyJWT, buyOrder);
 
 export default cartRouter;
