@@ -111,7 +111,7 @@ export async function removeProduct(req, res) {
 }
 
 export async function getCity(req, res) {
-  const { zipCode } = req.body;
+  const { zipCode } = req.params;
 
   try {
     const url = `https://viacep.com.br/ws/${zipCode}/json/`;
@@ -125,4 +125,3 @@ export async function getCity(req, res) {
     res.status(401).send({ message: "Erro ao buscar cep" });
   }
 }
-
