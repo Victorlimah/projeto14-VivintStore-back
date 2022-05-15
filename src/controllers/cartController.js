@@ -8,7 +8,7 @@ export async function getCart(req, res) {
     let total = 0;
     let lengthCart = 0;
 
-    const cart = await collection.findOne({ userId });
+    let cart = await collection.findOne({ userId });
     if (!cart) {
       await collection.insertOne({
         userId,
@@ -17,6 +17,7 @@ export async function getCart(req, res) {
         lengthCart,
       });
     }
+    cart = await collection.findOne({ userId });
 
     const products = cart.products;
 
@@ -31,6 +32,7 @@ export async function getCart(req, res) {
       lengthCart,
     });
   } catch (err) {
+    console.log(err);
     res.status(401).send({ message: "Erro ao pegar carrinho" });
   }
 }
@@ -38,27 +40,60 @@ export async function getCart(req, res) {
 export async function addProduct(req, res) {
   try {
     const collection = db.collection("cart");
+    const productsDB = db.collection("products");
     const { userId } = req;
-    const { productId, price, quantity } = req.body;
+    const { productId } = req.body;
 
-    const cart = await collection.findOne({ userId });
-    const products = cart.products;
-
-    const product = products.find((product) => product.id === productId);
-
-    if (product) product.quantity += quantity;
-    else {
-      products.push({
-        id: productId,
-        price,
-        quantity,
+    let cart = await collection.findOne({ userId });
+    if (!cart) {
+      await collection.insertOne({
+        userId,
+        products: [],
+        total: 0,
+        lengthCart: 0,
       });
     }
 
-    await collection.updateOne({ userId }, { $set: { products } });
+    cart = await collection.findOne({ userId });
+    const products = cart.products;
+
+    // ver se no carrinho já tem esse produto
+    const product = products.find((p) => p.productId === productId);
+
+    //pegar informações do produto
+    const infoProduct = await productsDB.findOne({ id: productId });
+
+    const { price, image, title } = infoProduct;
+
+    if (product) {
+      product.quantity += 1;
+    } else {
+      cart.products.push({
+        id: productId,
+        quantity: 1,
+        title,
+        price,
+        image,
+      });
+    }
+
+    cart.total += 1;
+    cart.lengthCart += 1;
+
+    await collection.updateOne(
+      { userId },
+      {
+        $set: {
+          products,
+          total: cart.total,
+          lengthCart: cart.lengthCart,
+        },
+      }
+    );
 
     res.status(200).send({ message: "Produto adicionado ao carrinho" });
   } catch (err) {
+    console.log(err);
     res.status(401).send({ message: "Erro ao adicionar produto" });
   }
 }
@@ -114,6 +149,8 @@ export async function buyOrder(req, res) {
 
     const cart = await collection.findOne({ userId });
     const products = cart.products;
+
+    //id será Date.now()
 
     const order = {
       id: Date.now(),

@@ -12,7 +12,7 @@ const cartRouter = Router();
 
 cartRouter.get("/city/:zipCode", getCity);
 cartRouter.get("/cart", verifyJWT, getCart);
-cartRouter.post("/cart-add", verifyJWT, addProduct);
+cartRouter.post("/cart", verifyJWT, addProduct);
 cartRouter.delete("/cart/:id", verifyJWT, removeProduct);
 cartRouter.put("/cart/:id/put", verifyJWT, putProduct);
 //cartRouter.post("/order", verifyJWT, buyOrder);
