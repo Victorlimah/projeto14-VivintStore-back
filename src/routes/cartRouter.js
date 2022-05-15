@@ -10,7 +10,7 @@ import {
 
 const cartRouter = Router();
 
-cartRouter.get("/city", getCity);
+cartRouter.get("/city/:zipCode", getCity);
 cartRouter.get("/cart", verifyJWT, getCart);
 cartRouter.post("/cart-add", verifyJWT, addProduct);
 cartRouter.post("/cart-remove", verifyJWT, removeProduct);
