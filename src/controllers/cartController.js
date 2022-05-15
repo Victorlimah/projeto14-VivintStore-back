@@ -4,7 +4,7 @@ import axios from "axios";
 export async function getCart(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req;
+    const { userId } = req.userId;
     let total = 0;
     let lengthCart = 0;
 
@@ -41,8 +41,11 @@ export async function addProduct(req, res) {
   try {
     const collection = db.collection("cart");
     const productsDB = db.collection("products");
-    const { userId } = req;
-    const { productId } = req.body;
+
+    console.log(await collection.find({}).toArray());
+
+    const { userId } = req.userId;
+    const { name } = req.body;
 
     let cart = await collection.findOne({ userId });
     if (!cart) {
@@ -58,18 +61,18 @@ export async function addProduct(req, res) {
     const products = cart.products;
 
     // ver se no carrinho já tem esse produto
-    const product = products.find((p) => p.productId === productId);
+    const product = products.find((p) => p.title === name);
 
     //pegar informações do produto
-    const infoProduct = await productsDB.findOne({ id: productId });
 
-    const { price, image, title } = infoProduct;
+    if (product) product.quantity += 1;
+    else {
+      const infoProduct = await productsDB.findOne({ title: name });
 
-    if (product) {
-      product.quantity += 1;
-    } else {
+      const { id, title, price, image } = infoProduct;
+
       cart.products.push({
-        id: productId,
+        id,
         quantity: 1,
         title,
         price,
@@ -101,13 +104,14 @@ export async function addProduct(req, res) {
 export async function putProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req;
-    const { productId, quantity } = req.body;
+    const { userId } = req.userId;
+    const { id } = req.params;
+    const { quantity } = req.body;
 
     const cart = await collection.findOne({ userId });
     const products = cart.products;
 
-    const product = products.find((product) => product.id === productId);
+    const product = products.find((product) => product.id === id);
 
     if (product) product.quantity = quantity;
 
@@ -122,7 +126,7 @@ export async function putProduct(req, res) {
 export async function removeProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req;
+    const { userId } = req.userId;
     const { id } = req.params;
 
     const cart = await collection.findOne({ userId });
@@ -144,7 +148,7 @@ export async function buyOrder(req, res) {
   try {
     const collection = db.collection("cart");
     const orders = db.collection("orders");
-    const { userId } = req;
+    const { userId } = req.userId;
     const { adress, zipCode, localidade, uf } = req.body;
 
     const cart = await collection.findOne({ userId });
