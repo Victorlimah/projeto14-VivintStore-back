@@ -154,10 +154,8 @@ export async function buyOrder(req, res) {
     const cart = await collection.findOne({ userId });
     const products = cart.products;
 
-    //id será Date.now()
-
     const order = {
-      id: Date.now(),
+      id: Date.now().toString().slice(-6),
       userId,
       adress,
       zipCode,

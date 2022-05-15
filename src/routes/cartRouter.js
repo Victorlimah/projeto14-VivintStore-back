@@ -6,6 +6,7 @@ import {
   addProduct,
   removeProduct,
   putProduct,
+  buyOrder,
 } from "../controllers/cartController.js";
 
 const cartRouter = Router();
@@ -15,6 +16,6 @@ cartRouter.get("/cart", verifyJWT, getCart);
 cartRouter.post("/cart", verifyJWT, addProduct);
 cartRouter.delete("/cart/:id", verifyJWT, removeProduct);
 cartRouter.put("/cart/:id", verifyJWT, putProduct);
-//cartRouter.post("/order", verifyJWT, buyOrder);
+cartRouter.post("/order", verifyJWT, buyOrder);
 
 export default cartRouter;
