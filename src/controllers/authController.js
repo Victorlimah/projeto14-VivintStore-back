@@ -32,6 +32,7 @@ export async function signUp(req, res) {
       password: await bcrypt.hash(password, 10),
       userId,
     });
+
     res.status(201).json({ message: "Usuário cadastrado" });
   } catch {
     res.status(500).send({ message: "Erro ao cadastrar usuário" });
