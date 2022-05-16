@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import chalk from "chalk";
 dotenv.config();
 
-const mongoClient = new MongoClient(process.env.MONGO_URI);
+const mongoClient = new MongoClient("mongodb://localhost:27017");
 try {
   await mongoClient.connect();
   console.log(chalk.blue("Conectado ao MongoDB"));

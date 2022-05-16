@@ -29,3 +29,15 @@ export async function getCategory(req, res) {
     res.status(401).send({ message: "Erro ao pegar produtos da categoria" });
   }
 }
+
+export async function postProduct(req, res) {
+  const { id, type, image, tittle, price, description } = req.body;
+
+  try {
+    const product = await db.collection("products").insertOne({ id, type, image, tittle, price, description });
+    res.status(200).send(product);
+  } catch {
+    res.status(401).send({ message: "Erro ao cadastrar produto" });
+  }
+}
+

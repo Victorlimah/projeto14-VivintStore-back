@@ -38,7 +38,8 @@ export async function getCart(req, res) {
 export async function addProduct(req, res) {
   try {
     const collection = db.collection("cart");
-    const { userId } = req.params;
+    const token = req.headers.authorization;
+    console.log(token);
     const { productId, price, quantity } = req.body;
 
     const cart = await collection.findOne({ userId });
