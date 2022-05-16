@@ -59,7 +59,7 @@ export async function signIn(req, res) {
 
     if (user && isValid) {
       const data = { userId: user._id, name: user.name };
-      const token = jwt.sign(data, secretKey, { expiresIn: "1h" });
+      const token = jwt.sign(data, secretKey);
 
       await db.collection("sections").insertOne({ token, user: user.email });
       res.status(200).send({ token });
